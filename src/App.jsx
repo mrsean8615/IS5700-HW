@@ -5,7 +5,7 @@ import Modal from "./components/Modal.jsx";
 import DeleteConfirmation from "./components/DeleteConfirmation.jsx";
 import logoImg from "./assets/logo.png";
 import AvailablePlaces from "./components/AvailablePlaces.jsx";
-import { fetchUserPlaces, updateUserPlaces } from "./http.js";
+import { fetchAvailablePlaces, updateUserPlaces } from "./http.js";
 import Error from "./components/Error.jsx";
 
 function App() {
@@ -22,9 +22,11 @@ function App() {
     async function fetchPlaces() {
       setLoading(true);
       try {
-        const places = await fetchUserPlaces();
+        const places = await fetchAvailablePlaces("user-places");
         setUserPlaces(places);
-      } catch (error) {}
+      } catch (error) {
+        setError({ message: error.message || "failed to fetch user places" });
+      }
       setLoading(false);
     }
     fetchPlaces();
@@ -113,12 +115,17 @@ function App() {
         </p>
       </header>
       <main>
-        <Places
-          title="I'd like to visit ..."
-          fallbackText="Select the places you would like to visit below."
-          places={userPlaces}
-          onSelectPlace={handleStartRemovePlace}
-        />
+        {error && <Error title="An error occurred!" message={error.message} />}
+        {!error && (
+          <Places
+            title="I'd like to visit ..."
+            isLoading={loading}
+            loadingText="Fetching your places..."
+            fallbackText="Select the places you would like to visit below."
+            places={userPlaces}
+            onSelectPlace={handleStartRemovePlace}
+          />
+        )}
 
         <AvailablePlaces onSelectPlace={handleSelectPlace} />
       </main>
